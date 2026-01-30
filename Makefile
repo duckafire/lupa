@@ -13,7 +13,7 @@ CC := gcc
 AR := ar
 
 AFLAGS := rcs
-CFLAGS := -Wall -Wextra -std=c90
+CFLAGS := -Wall -Wextra -Wno-unused-function -std=c90
 
 
 BLD_D := ./build
