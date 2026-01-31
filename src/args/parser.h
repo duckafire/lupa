@@ -13,6 +13,7 @@ typedef enum
 	INVALID_OPT,
 	OPT_REPEAT,
 	FILE_NOT_FOUND,
+	INVALID_FLAG_POSITION,
 } EArgsErr;
 
 static void storeError(EArgsErr id, int argId, const char *arg, const char *flagPrefix);

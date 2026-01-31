@@ -27,9 +27,10 @@ static void storeError(EArgsErr id, int argId, const char *arg, const char *flag
 #	define MSG(first) fprintf( errorsBuf, first " (#%d): \"%s%s\".\n", argId, flagPrefix, arg )
 	switch(id)
 	{
-		case INVALID_OPT:    MSG("Invalid option"); break;
-		case OPT_REPEAT:     MSG("Option repeating"); break;
-		case FILE_NOT_FOUND: MSG("File not found"); break;
+		case INVALID_OPT:           MSG("Invalid option"); break;
+		case OPT_REPEAT:            MSG("Option repeating"); break;
+		case FILE_NOT_FOUND:        MSG("File not found"); break;
+		case INVALID_FLAG_POSITION: MSG("Invalid option possition"); break;
 	}
 #	undef MSG
 }
@@ -50,9 +51,20 @@ static void valFile(Options *opts, int argId, const char *fileName)
 	FILE *file = fopen(fileName, "r");
 
 	if(file == NULL)
-		storeError( FILE_NOT_FOUND, argId, fileName, FP_NONE);
-	else
-		addFileToList(&(opts->filesList), file);
+	{
+		storeError(
+			(!opts->list.optListEnd && fileName[0] == '-')
+				? INVALID_FLAG_POSITION
+				: FILE_NOT_FOUND,
+			argId,
+			fileName,
+			FP_NONE
+		);
+
+		return;
+	}
+
+	addFileToList(&(opts->filesList), file);
 }
 
 static void valLongFlag(Options *opts, int argId, const char *flag)
@@ -143,10 +155,10 @@ void argsParser(int argc, char *argv[], Options *opts)
 	{
 		cur = argv[argId];
 
-		if(isFileList)
+		if(isFileList || opts->argsList.optListEnd)
 			valFile( opts, argId, cur );
 
-		else if(cur[0] != '-' || (!isFileList && opts->argsList.optListEnd))
+		else if(cur[0] != '-')
 			isFileList = true;
 
 		else if(cur[1] != '-')
