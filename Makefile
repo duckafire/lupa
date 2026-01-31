@@ -15,6 +15,10 @@ AR := ar
 AFLAGS := rcs
 CFLAGS := -Wall -Wextra -Wno-unused-function -std=c90
 
+ifdef DEBUG_MODE
+  CFLAGS += -g
+endif
+
 
 BLD_D := ./build
 OBJ_D := $(BLD_D)/objects
