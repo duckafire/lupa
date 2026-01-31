@@ -25,6 +25,8 @@ FILE *errorsBuf;
 static void storeError(EArgsErr id, int argId, const char *arg, const char *optPrefix)
 {
 #	define MSG(first) fprintf( errorsBuf, first " (#%d): \"%s%s\".\n", argId, optPrefix, arg )
+	errorsCount++;
+
 	switch(id)
 	{
 		case INVALID_OPT:           MSG("Invalid option"); break;
