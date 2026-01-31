@@ -150,10 +150,10 @@ void argsParser(int argc, char *argv[], Options *opts)
 			isFileList = true;
 
 		else if(cur[1] != '-')
-			valLongFlag( opts, argId, &(cur[2]) );
+			valShortFlag( opts, argId, &(cur[1]) );
 
 		else
-			valShortFlag( opts, argId, &(cur[1]) );
+			valLongFlag( opts, argId, &(cur[2]) );
 	}
 
 	if(errorsCount > 0)
