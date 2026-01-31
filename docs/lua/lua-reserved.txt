@@ -1,0 +1,52 @@
+FIRST CHARACTERS TO WORD
+	a-z A-Z
+	_
+
+NO-FIRST CHARACTERS TO WORD
+	a-z A-Z
+	_
+	0-9
+
+NUMBERS
+	0 0.0 0x0
+
+KEYWORDS
+	and or not false true nil
+	if then elseif else
+	for while repeat until
+	break return
+	local function do end
+	in
+
+OPERATORS
+	+  -  *  /  %  ^ ..
+	== ~= <= >= <  >
+	(  )  {  }  [  ]
+	;  ,
+	.  :
+	=  # ...
+	-- --[[
+	'  " [[ ]] [=[ ]=]
+
+VARIABLES
+	_VERSION
+
+TABLES
+	_G        os
+	coroutine package
+	debug     string
+	io        table
+	math
+
+FUNCTIONS
+	assert         module   setfenv
+	collectgarbage next     setmetatable
+	dofile         pairs    tonumber
+	error          pcall    tostring
+	getfenv        print    type
+	getmetatable   rawequal unpack
+	ipairs         rawget   xpcall
+	load           rawset
+	loadfile       require
+	loadstring     select
+
