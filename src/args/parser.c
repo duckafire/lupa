@@ -171,14 +171,10 @@ void argsParser(int argc, char *argv[], OptionsData *optsData)
 			valLongFlag( optsData, argId, &(cur[2]) );
 	}
 
-	if(errorsCount > 0)
-	{
-		if(!(optsData->list.quietError) && !(optsData->list.quiet))
-			displayErrors();
-		else
-			fclose(errorsBuf);
+	if(errorsCount == 0)
+		return;
 
-		exit( errorsCount );
-	}
+	displayErrors();
+	exit( errorsCount );
 }
 
