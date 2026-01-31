@@ -12,32 +12,32 @@
  *    --            : end of options list.
  */
 
-/* F_  : flags
- * FS_ : short flags
- * FP_ : flag prefix */
+/* OPT_   : option
+ * OPT_S_ : short option
+ * OPT_P_ : option prefix */
 
-#define FP_NONE  ""
-#define FP_SHORT "-"
-#define FP_LONG  "--"
+#define OPT_P_NONE  ""
+#define OPT_P_SHORT "-"
+#define OPT_P_LONG  "--"
 
-#define F_QUIET_W "quiet-warn"
-#define F_QUIET_E "quiet-error"
-#define F_QUIET   "quiet"
-#define F_FATAL_W "fatal-warn"
-#define F_FATAL_E "fatal-error"
-#define F_FATAL   "fatal"
-#define F_STDIN   "stdin"
-#define F_OPT_END "\0"
+#define OPT_QUIET_W "quiet-warn"
+#define OPT_QUIET_E "quiet-error"
+#define OPT_QUIET   "quiet"
+#define OPT_FATAL_W "fatal-warn"
+#define OPT_FATAL_E "fatal-error"
+#define OPT_FATAL   "fatal"
+#define OPT_STDIN   "stdin"
+#define OPT_END     "\0"
 /* Prefixes `-` and `--` is not used in comparation
- * between expected flags and received arguments.
+ * between expected option and received arguments.
  * OPT_END is `--`, so if `--` is removed only
  * `\0` will remain. */
 
-#define FS_QUIET_W 'W'
-#define FS_QUIET_E 'E'
-#define FS_QUIET   'Q'
-#define FS_FATAL_W 'w'
-#define FS_FATAL_E 'e'
-#define FS_FATAL   'f'
+#define OPT_S_QUIET_W 'W'
+#define OPT_S_QUIET_E 'E'
+#define OPT_S_QUIET   'Q'
+#define OPT_S_FATAL_W 'w'
+#define OPT_S_FATAL_E 'e'
+#define OPT_S_FATAL   'f'
 
 #endif

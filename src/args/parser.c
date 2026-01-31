@@ -4,27 +4,27 @@
 #include <stdlib.h>
 
 #include "./storages.h"
-#include "./flags.h"
+#include "./options.h"
 #include "./parser.h"
 
-#define IS_FLAG(arg, flag) (strcmp((arg), (flag)) == 0)
+#define IS_FLAG(arg, opt) (strcmp((arg), (opt)) == 0)
 
 /* Validate Boolean Flag Repeation;
  * do not fear, this is JUST a ternary operation;
- * optField is a LITERAL field name of opts->argsList. */
-#define VBFR(opts, optField, argId, flagName, flagPrefix) \
+ * optField is a LITERAL field name of optsData->list. */
+#define VBFR(optsData, optField, argId, optName, optPrefix) \
 	( \
-		(bool)(opts->argsList.optField) \
-		? storeError( OPT_REPEAT, (argId), (flagName), (flagPrefix) ) \
-		: ((opts->argsList.optField) = (bool)true) \
+		(bool)(optsData->list.optField) \
+		? storeError( OPT_REPEAT, (argId), (optName), (optPrefix) ) \
+		: ((optsData->list.optField) = (bool)true) \
 	)
 
 size_t errorsCount;
 FILE *errorsBuf;
 
-static void storeError(EArgsErr id, int argId, const char *arg, const char *flagPrefix)
+static void storeError(EArgsErr id, int argId, const char *arg, const char *optPrefix)
 {
-#	define MSG(first) fprintf( errorsBuf, first " (#%d): \"%s%s\".\n", argId, flagPrefix, arg )
+#	define MSG(first) fprintf( errorsBuf, first " (#%d): \"%s%s\".\n", argId, optPrefix, arg )
 	switch(id)
 	{
 		case INVALID_OPT:           MSG("Invalid option"); break;
@@ -46,67 +46,67 @@ static void displayErrors(void)
 	fclose(errorsBuf);
 }
 
-static void valFile(Options *opts, int argId, const char *fileName)
+static void valFile(OptionsData *optsData, int argId, const char *fileName)
 {
 	FILE *file = fopen(fileName, "r");
 
 	if(file == NULL)
 	{
 		storeError(
-			(!opts->list.optListEnd && fileName[0] == '-')
+			(!optsData->list.optListEnd && fileName[0] == '-')
 				? INVALID_FLAG_POSITION
 				: FILE_NOT_FOUND,
 			argId,
 			fileName,
-			FP_NONE
+			OPT_P_NONE
 		);
 
 		return;
 	}
 
-	addFileToList(&(opts->filesList), file);
+	addFileToList(&(optsData->filesList), file);
 }
 
-static void valLongFlag(Options *opts, int argId, const char *flag)
+static void valLongFlag(OptionsData *optsData, int argId, const char *opt)
 {
-#	define VAL(optField) VBFR(opts, optField, argId, flag, FP_LONG)
+#	define VAL(optField) VBFR(optsData, optField, argId, opt, OPT_P_LONG)
 
-	if(IS_FLAG(flag, F_QUIET_W))
+	if(IS_FLAG(opt, OPT_QUIET_W))
 		VAL( quietWarn );
 
-	else if(IS_FLAG(flag, F_QUIET_E))
+	else if(IS_FLAG(opt, OPT_QUIET_E))
 		VAL( quietError );
 
-	else if(IS_FLAG(flag, F_QUIET))
+	else if(IS_FLAG(opt, OPT_QUIET))
 		VAL( quiet );
 
-	else if(IS_FLAG(flag, F_FATAL_W))
+	else if(IS_FLAG(opt, OPT_FATAL_W))
 		VAL( fatalWarn );
 
-	else if(IS_FLAG(flag, F_FATAL_E))
+	else if(IS_FLAG(opt, OPT_FATAL_E))
 		VAL( fatalError );
 
-	else if(IS_FLAG(flag, F_FATAL))
+	else if(IS_FLAG(opt, OPT_FATAL))
 		VAL( fatal );
 
-	else if(IS_FLAG(flag, F_STDIN))
+	else if(IS_FLAG(opt, OPT_STDIN))
 		VAL( readStdin );
 
-	else if(IS_FLAG(flag, F_OPT_END))
+	else if(IS_FLAG(opt, OPT_END))
 		VAL( optListEnd );
 
 	else
-		storeError( INVALID_OPT, argId, flag, FP_LONG);
+		storeError( INVALID_OPT, argId, opt, OPT_P_LONG);
 
 #	undef VAL
 }
 
-static void valShortFlag(Options *opts, int argId, const char *flagsList)
+static void valShortFlag(OptionsData *optsData, int argId, const char *optsList)
 {
-	char *f = (char*)flagsList;
+	char *f = (char*)optsList;
 	char *curFlag = "\0\0";
 
-#	define VAL(optField) VBFR(opts, optField, argId, curFlag, FP_SHORT);
+#	define VAL(optField) VBFR(optsData, optField, argId, curFlag, OPT_P_SHORT);
 #	define CASE(optField, expectedFlag) \
 	case expectedFlag: \
 		VAL( optField ); \
@@ -116,15 +116,15 @@ static void valShortFlag(Options *opts, int argId, const char *flagsList)
 	{
 		switch(*f)
 		{
-			CASE(quietWarn,  FS_QUIET_W);
-			CASE(quietError, FS_QUIET_E);
-			CASE(quiet,      FS_QUIET);
-			CASE(fatalWarn,  FS_FATAL_W);
-			CASE(fatalError, FS_FATAL_E);
-			CASE(fatal,      FS_FATAL);
+			CASE(quietWarn,  OPT_S_QUIET_W);
+			CASE(quietError, OPT_S_QUIET_E);
+			CASE(quiet,      OPT_S_QUIET);
+			CASE(fatalWarn,  OPT_S_FATAL_W);
+			CASE(fatalError, OPT_S_FATAL_E);
+			CASE(fatal,      OPT_S_FATAL);
 			default:
 				curFlag[0] = *f;
-				storeError( INVALID_OPT, argId, curFlag, FP_SHORT );
+				storeError( INVALID_OPT, argId, curFlag, OPT_P_SHORT );
 		}
 	}
 
@@ -132,12 +132,12 @@ static void valShortFlag(Options *opts, int argId, const char *flagsList)
 #	undef CASE
 }
 
-void argsParser(int argc, char *argv[], Options *opts)
+void argsParser(int argc, char *argv[], OptionsData *optsData)
 {
 	if(argc == 1)
 	{
 		/* It has only program name. */
-		opts->noArgs = true;
+		optsData->noArgs = true;
 		return;
 	}
 
@@ -155,22 +155,22 @@ void argsParser(int argc, char *argv[], Options *opts)
 	{
 		cur = argv[argId];
 
-		if(isFileList || opts->argsList.optListEnd)
-			valFile( opts, argId, cur );
+		if(isFileList || optsData->list.optListEnd)
+			valFile( optsData, argId, cur );
 
 		else if(cur[0] != '-')
 			isFileList = true;
 
 		else if(cur[1] != '-')
-			valShortFlag( opts, argId, &(cur[1]) );
+			valShortFlag( optsData, argId, &(cur[1]) );
 
 		else
-			valLongFlag( opts, argId, &(cur[2]) );
+			valLongFlag( optsData, argId, &(cur[2]) );
 	}
 
 	if(errorsCount > 0)
 	{
-		if(!(opts->argsList.quietError) && !(opts->argsList.quiet))
+		if(!(optsData->list.quietError) && !(optsData->list.quiet))
 			displayErrors();
 		else
 			fclose(errorsBuf);

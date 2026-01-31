@@ -37,8 +37,8 @@ typedef struct
 		bool fatal;
 		bool readStdin;
 		bool optListEnd;
-	} argsList;
-} Options;
+	} list;
+} OptionsData;
 
 
 void addFileToList(FilesList *list, FILE *stream);

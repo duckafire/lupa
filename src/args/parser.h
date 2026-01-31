@@ -16,13 +16,13 @@ typedef enum
 	INVALID_FLAG_POSITION,
 } EArgsErr;
 
-static void storeError(EArgsErr id, int argId, const char *arg, const char *flagPrefix);
+static void storeError(EArgsErr id, int argId, const char *arg, const char *optPrefix);
 static void displayErrors(void);
 
-static void valFile(     Options *opts, int argId, const char *fileName);
-static void valLongFlag( Options *opts, int argId, const char *flag);
-static void valShortFlag(Options *opts, int argId, const char *flagsList);
+static void valFile(     OptionsData *optsData, int argId, const char *fileName);
+static void valLongFlag( OptionsData *optsData, int argId, const char *opt);
+static void valShortFlag(OptionsData *optsData, int argId, const char *optsList);
 
-void argsParser(int argc, char *argv[], Options *opts);
+void argsParser(int argc, char *argv[], OptionsData *optsData);
 
 #endif

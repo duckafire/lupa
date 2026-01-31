@@ -6,32 +6,32 @@
 
 int main(int argc, char *argv[])
 {
-	Options opts;
+	OptionsData opts;
 	opts.noArgs = false;
 
 	opts.filesList.firstItem = NULL;
 	opts.filesList.lastItem  = NULL;
 	opts.filesList.abort     = false;
 
-	opts.argsList.quietWarn  = false;
-	opts.argsList.quietError = false;
-	opts.argsList.quiet      = false;
-	opts.argsList.fatalWarn  = false;
-	opts.argsList.fatalError = false;
-	opts.argsList.fatal      = false;
-	opts.argsList.readStdin  = false;
-	opts.argsList.optListEnd = false;
+	opts.list.quietWarn  = false;
+	opts.list.quietError = false;
+	opts.list.quiet      = false;
+	opts.list.fatalWarn  = false;
+	opts.list.fatalError = false;
+	opts.list.fatal      = false;
+	opts.list.readStdin  = false;
+	opts.list.optListEnd = false;
 
 	argsParser(argc, argv, &opts);
 
-	printf("quietWarn: %d\n", opts.argsList.quietWarn );
-	printf("quietError: %d\n", opts.argsList.quietError);
-	printf("quiet: %d\n", opts.argsList.quiet     );
-	printf("fatalWarn: %d\n", opts.argsList.fatalWarn );
-	printf("fatalError: %d\n", opts.argsList.fatalError);
-	printf("fatal: %d\n", opts.argsList.fatal     );
-	printf("readStdin: %d\n", opts.argsList.readStdin );
-	printf("optListEnd: %d\n", opts.argsList.optListEnd);
+	printf("quietWarn: %d\n", opts.list.quietWarn );
+	printf("quietError: %d\n", opts.list.quietError);
+	printf("quiet: %d\n", opts.list.quiet     );
+	printf("fatalWarn: %d\n", opts.list.fatalWarn );
+	printf("fatalError: %d\n", opts.list.fatalError);
+	printf("fatal: %d\n", opts.list.fatal     );
+	printf("readStdin: %d\n", opts.list.readStdin );
+	printf("optListEnd: %d\n", opts.list.optListEnd);
 	dropFilesList(&(opts.filesList));
 
 	return 0;
