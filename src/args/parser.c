@@ -104,7 +104,8 @@ static void valLongFlag(OptionsData *optsData, int argId, const char *opt)
 static void valShortFlag(OptionsData *optsData, int argId, const char *optsList)
 {
 	char *f = (char*)optsList;
-	char *curFlag = "\0\0";
+	char curFlag[2];
+	curFlag[1] = '\0';
 
 #	define VAL(optField) VBFR(optsData, optField, argId, curFlag, OPT_P_SHORT);
 #	define CASE(optField, expectedFlag) \
@@ -114,6 +115,8 @@ static void valShortFlag(OptionsData *optsData, int argId, const char *optsList)
 
 	for(; *f != '\0'; (f)++)
 	{
+		curFlag[0] = *f;
+
 		switch(*f)
 		{
 			CASE(quietWarn,  OPT_S_QUIET_W);
@@ -122,9 +125,7 @@ static void valShortFlag(OptionsData *optsData, int argId, const char *optsList)
 			CASE(fatalWarn,  OPT_S_FATAL_W);
 			CASE(fatalError, OPT_S_FATAL_E);
 			CASE(fatal,      OPT_S_FATAL);
-			default:
-				curFlag[0] = *f;
-				storeError( INVALID_OPT, argId, curFlag, OPT_P_SHORT );
+			default: storeError( INVALID_OPT, argId, curFlag, OPT_P_SHORT );
 		}
 	}
 
