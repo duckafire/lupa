@@ -4,7 +4,7 @@
 # executable file with the compiled static library plus
 # the content out of ./src/core.
 
-.PHONY: all test clean
+.PHONY: all test clean syntax
 
 
 PROJ_NAME := lupa
@@ -46,6 +46,9 @@ test:
 
 clean:
 	@rm -rf $(BLD_D)
+
+syntax:
+	@$(CC) $(CFLAGS) -fsyntax-only $(ALL_FILES_C)
 
 $(OUT_EXE): $(OUT_LIB)
 	@$(CC) $(CFLAGS) $(FILES_EXE_C) -o $@ -static -L$(BLD_D) -l$(PROJ_NAME)
