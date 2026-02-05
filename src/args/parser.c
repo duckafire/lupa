@@ -175,6 +175,7 @@ void argsParser(int argc, char *argv[], OptionsData *optsData)
 		return;
 
 	displayErrors();
+	free(optsData);
 	exit( errorsCount );
 }
 
