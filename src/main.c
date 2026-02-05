@@ -4,7 +4,7 @@
 #include "./args/storages.h"
 #include "./args/parser.h"
 
-void transferToStderr(FILE *buf)
+static void transferToStderr(FILE *buf)
 {
 	char c;
 	fseek(buf, 0, SEEK_SET);
@@ -47,6 +47,12 @@ int main(int argc, char *argv[])
 	fclose(log->msgBuf);
 	free(log);
 
+	if(opts->filesList.firstItem == NULL)
+	{
+		free(opts);
+		return 0;
+	}
+
 	printf("quietWarn: %d\n",  opts->list.quietWarn );
 	printf("quietError: %d\n", opts->list.quietError);
 	printf("quiet: %d\n",      opts->list.quiet     );
@@ -55,9 +61,11 @@ int main(int argc, char *argv[])
 	printf("fatal: %d\n",      opts->list.fatal     );
 	printf("readStdin: %d\n",  opts->list.readStdin );
 	printf("optListEnd: %d\n", opts->list.optListEnd);
-	dropFilesList(&(opts->filesList));
-	free(opts);
 
+	FILE **filesArray = convertFilesListToFilesArray( &(opts->filesList) );
+
+	free(filesArray);
+	free(opts);
 	return 0;
 }
 

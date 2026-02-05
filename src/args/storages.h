@@ -42,8 +42,9 @@ typedef struct
 
 
 void addFileToList(FilesList *list, FILE *stream);
-void dropFilesList(FilesList *list);
+FILE** convertFilesListToFilesArray(FilesList *list);
 
+static void dropFilesList(FilesList *list);
 static void dropFilesListItem(FilesListItem *item);
 
 

@@ -27,7 +27,27 @@ void addFileToList(FilesList *list, FILE *stream)
 	list->lastItem = newItem;
 }
 
-void dropFilesList(FilesList *list)
+FILE** convertFilesListToFilesArray(FilesList *list)
+{
+	size_t quant;
+	FilesListItem *cur, *next;
+
+	for(quant = 0, cur = list->firstItem; cur != NULL; cur = cur->next)
+		quant++;
+
+	FILE **array = malloc( sizeof(FILE*) * quant );
+
+	for(quant = 0, cur = list->firstItem; cur != NULL; cur = next)
+	{
+		array[ quant ] = cur->stream;
+		next = cur->next;
+		free(cur);
+	}
+
+	return array;
+}
+
+static void dropFilesList(FilesList *list)
 {
 	if(list->firstItem == NULL)
 		return;
