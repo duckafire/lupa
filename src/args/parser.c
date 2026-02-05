@@ -12,20 +12,17 @@
 /* Validate Boolean Flag Repeation;
  * do not fear, this is JUST a ternary operation;
  * optField is a LITERAL field name of optsData->list. */
-#define VBFR(optsData, optField, argId, optName, optPrefix) \
+#define VBFR(optsData, optField, errorsLog, argId, optName, optPrefix) \
 	( \
 		(bool)(optsData->list.optField) \
-		? storeError( OPT_REPEAT, (argId), (optName), (optPrefix) ) \
+		? storeError( OPT_REPEAT, errorsLog, (argId), (optName), (optPrefix) ) \
 		: ((optsData->list.optField) = (bool)true) \
 	)
 
-size_t errorsCount;
-FILE *errorsBuf;
-
-static void storeError(EArgsErr id, int argId, const char *arg, const char *optPrefix)
+static void storeError(EArgsErr id, ArgsErrorsLog *errorsLog, int argId, const char *arg, const char *optPrefix)
 {
-#	define MSG(first) fprintf( errorsBuf, first " (#%d): \"%s%s\".\n", argId, optPrefix, arg )
-	errorsCount++;
+#	define MSG(first) fprintf( errorsLog->msgBuf, first " (#%d): \"%s%s\".\n", argId, optPrefix, arg )
+	(errorsLog->quant)++;
 
 	switch(id)
 	{
@@ -37,18 +34,7 @@ static void storeError(EArgsErr id, int argId, const char *arg, const char *optP
 #	undef MSG
 }
 
-static void displayErrors(void)
-{
-	char c;
-	fseek(errorsBuf, 0, SEEK_SET);
-
-	while((c = fgetc(errorsBuf)) != EOF)
-		fputc(c, stderr);
-
-	fclose(errorsBuf);
-}
-
-static void valFile(OptionsData *optsData, int argId, const char *fileName)
+static void valFile(OptionsData *optsData, ArgsErrorsLog *errorsLog, int argId, const char *fileName)
 {
 	FILE *file = fopen(fileName, "r");
 
@@ -58,6 +44,7 @@ static void valFile(OptionsData *optsData, int argId, const char *fileName)
 			(!optsData->list.optListEnd && fileName[0] == '-')
 				? INVALID_FLAG_POSITION
 				: FILE_NOT_FOUND,
+			errorsLog,
 			argId,
 			fileName,
 			OPT_P_NONE
@@ -69,9 +56,9 @@ static void valFile(OptionsData *optsData, int argId, const char *fileName)
 	addFileToList(&(optsData->filesList), file);
 }
 
-static void valLongFlag(OptionsData *optsData, int argId, const char *opt)
+static void valLongFlag(OptionsData *optsData, ArgsErrorsLog *errorsLog, int argId, const char *opt)
 {
-#	define VAL(optField) VBFR(optsData, optField, argId, opt, OPT_P_LONG)
+#	define VAL(optField) VBFR(optsData, optField, errorsLog, argId, opt, OPT_P_LONG)
 
 	if(IS_FLAG(opt, OPT_QUIET_W))
 		VAL( quietWarn );
@@ -98,18 +85,18 @@ static void valLongFlag(OptionsData *optsData, int argId, const char *opt)
 		VAL( optListEnd );
 
 	else
-		storeError( INVALID_OPT, argId, opt, OPT_P_LONG);
+		storeError( INVALID_OPT, errorsLog, argId, opt, OPT_P_LONG);
 
 #	undef VAL
 }
 
-static void valShortFlag(OptionsData *optsData, int argId, const char *optsList)
+static void valShortFlag(OptionsData *optsData, ArgsErrorsLog *errorsLog, int argId, const char *optsList)
 {
 	char *f = (char*)optsList;
 	char curFlag[2];
 	curFlag[1] = '\0';
 
-#	define VAL(optField) VBFR(optsData, optField, argId, curFlag, OPT_P_SHORT);
+#	define VAL(optField) VBFR(optsData, optField, errorsLog, argId, curFlag, OPT_P_SHORT);
 #	define CASE(optField, expectedFlag) \
 	case expectedFlag: \
 		VAL( optField ); \
@@ -127,7 +114,7 @@ static void valShortFlag(OptionsData *optsData, int argId, const char *optsList)
 			CASE(fatalWarn,  OPT_S_FATAL_W);
 			CASE(fatalError, OPT_S_FATAL_E);
 			CASE(fatal,      OPT_S_FATAL);
-			default: storeError( INVALID_OPT, argId, curFlag, OPT_P_SHORT );
+			default: storeError( INVALID_OPT, errorsLog, argId, curFlag, OPT_P_SHORT );
 		}
 	}
 
@@ -135,17 +122,18 @@ static void valShortFlag(OptionsData *optsData, int argId, const char *optsList)
 #	undef CASE
 }
 
-void argsParser(int argc, char *argv[], OptionsData *optsData)
+ArgsErrorsLog* argsParser(int argc, char *argv[], OptionsData *optsData)
 {
+	ArgsErrorsLog *errorsLog = malloc(sizeof(ArgsErrorsLog));
+	errorsLog->quant  = 0;
+	errorsLog->msgBuf = tmpfile();
+
 	if(argc == 1)
 	{
 		/* It has only program name. */
 		optsData->noArgs = true;
-		return;
+		return errorsLog;
 	}
-
-	errorsCount = 0;
-	errorsBuf   = tmpfile();
 
 	/* After OPT_END or a file, the next
 	 * arguments will be considered files. */
@@ -159,23 +147,18 @@ void argsParser(int argc, char *argv[], OptionsData *optsData)
 		cur = argv[argId];
 
 		if(isFileList || optsData->list.optListEnd)
-			valFile( optsData, argId, cur );
+			valFile( optsData, errorsLog, argId, cur );
 
 		else if(cur[0] != '-')
 			isFileList = true;
 
 		else if(cur[1] != '-')
-			valShortFlag( optsData, argId, &(cur[1]) );
+			valShortFlag( optsData, errorsLog, argId, &(cur[1]) );
 
 		else
-			valLongFlag( optsData, argId, &(cur[2]) );
+			valLongFlag( optsData, errorsLog, argId, &(cur[2]) );
 	}
 
-	if(errorsCount == 0)
-		return;
-
-	displayErrors();
-	free(optsData);
-	exit( errorsCount );
+	return errorsLog;
 }
 

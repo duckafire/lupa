@@ -6,6 +6,12 @@
 
 #include "./storages.h"
 
+typedef struct
+{
+	int quant;
+	FILE *msgBuf;
+} ArgsErrorsLog;
+
 typedef enum
 {
 	/* Update storeError()
@@ -16,13 +22,12 @@ typedef enum
 	INVALID_FLAG_POSITION,
 } EArgsErr;
 
-static void storeError(EArgsErr id, int argId, const char *arg, const char *optPrefix);
-static void displayErrors(void);
+static void storeError(EArgsErr id, ArgsErrorsLog *errorsLog, int argId, const char *arg, const char *optPrefix);
 
-static void valFile(     OptionsData *optsData, int argId, const char *fileName);
-static void valLongFlag( OptionsData *optsData, int argId, const char *opt);
-static void valShortFlag(OptionsData *optsData, int argId, const char *optsList);
+static void valFile(     OptionsData *optsData, ArgsErrorsLog *errorsLog, int argId, const char *fileName);
+static void valLongFlag( OptionsData *optsData, ArgsErrorsLog *errorsLog, int argId, const char *opt);
+static void valShortFlag(OptionsData *optsData, ArgsErrorsLog *errorsLog, int argId, const char *optsList);
 
-void argsParser(int argc, char *argv[], OptionsData *optsData);
+ArgsErrorsLog* argsParser(int argc, char *argv[], OptionsData *optsData);
 
 #endif
